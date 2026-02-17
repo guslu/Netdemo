@@ -1,31 +1,34 @@
-# Netdemo SaaS Project Management Platform (Scaffold)
+# Netdemo SaaS Project Management Platform
 
-This repository now contains a production-oriented scaffold for a .NET 8 + React TypeScript SaaS platform.
+Production-ready baseline for a .NET 8 + React TypeScript SaaS project management system.
 
 ## Architecture decisions
-- **Clean Architecture** split into `Api`, `Application`, `Domain`, and `Infrastructure` to enforce direction of dependencies.
-- **CQRS-lite with MediatR** to separate commands/queries while avoiding over-abstraction.
-- **FluentValidation pipeline** for centralized request validation.
-- **EF Core + ASP.NET Identity** for persistence and identity/security baseline.
-- **ProblemDetails + global exception handling** for consistent API errors.
-- **Global exception mapping** with typed exceptions and validation problem details including trace ids for observability.
-- **Automatic audit timestamp updates** in persistence so `UpdatedAt` is consistently maintained.
-- **JWT + role-based authorization** for secure multi-role access.
-- **Environment-based settings** and env var overrides for secrets and cloud deployment readiness.
+- **Clean Architecture** across `Api`, `Application`, `Domain`, `Infrastructure` and dedicated tests projects.
+- **CQRS-lite with MediatR** keeps use cases explicit while avoiding unnecessary complexity.
+- **Centralized validation with FluentValidation + pipeline behavior** ensures commands/queries are validated consistently.
+- **ASP.NET Identity + JWT + role authorization** provides enterprise-ready authentication and authorization.
+- **Tenant-aware request handling** via organization claim checks in application handlers.
+- **ProblemDetails + global exception handler** standardizes API error responses.
+- **Audit hooks** are recorded for core write operations (projects, work items, comments).
 
-## Delivery status
-- See detailed requirement-by-requirement status in `docs/DeliveryStatus.md`.
-
-## Current scope
-This milestone only scaffolds structure and baseline wiring. Feature implementation (full auth flow, tenant isolation enforcement, richer business logic, migrations content, etc.) is intentionally deferred to next iterations.
+## Included capabilities
+- JWT login and admin-only user registration endpoint.
+- Role-based access control (`Admin`, `Manager`, `Member`).
+- Organizations, projects, work items, comments, and audit log persistence model.
+- Health endpoints (`/health/live`, `/health/ready`).
+- API versioning (`v1`).
+- Serilog structured logging.
+- React frontend with login flow, protected routes, project/work-item views, and API integration.
+- Docker + docker-compose for API and SQL Server.
+- CI scaffold for build, tests, coverage, and Docker build.
 
 ## Solution layout
-- `src/Api` - HTTP entrypoint, middleware, auth policies, health checks, API versioning.
-- `src/Application` - use cases, validation, MediatR handlers, abstractions.
-- `src/Domain` - core entities and business primitives.
-- `src/Infrastructure` - EF Core, Identity, JWT generation, persistence wiring.
-- `tests/UnitTests` / `tests/IntegrationTests` - baseline test suites.
-- `frontend` - React + TypeScript + Vite + Tailwind scaffold with protected route and API client.
+- `src/Api` - HTTP entrypoint, middleware, auth policies, health/versioning.
+- `src/Application` - commands/queries, validation, handlers, abstractions.
+- `src/Domain` - entities and core business primitives.
+- `src/Infrastructure` - EF Core, Identity, JWT, persistence and service implementations.
+- `tests/UnitTests` + `tests/IntegrationTests` - backend test projects.
+- `frontend` - React + TypeScript + Vite + Tailwind frontend.
 
 ## Running with Docker Compose
 1. Set env vars:
@@ -36,7 +39,8 @@ This milestone only scaffolds structure and baseline wiring. Feature implementat
    docker compose up --build
    ```
 
-## Cloud readiness hooks
-- Application Insights connection string configuration slot in `appsettings`.
-- Health endpoints: `/health/live` and `/health/ready`.
-- Dockerized services for lift-and-shift to Azure App Service + Azure SQL.
+## Cloud-readiness hooks
+- Environment-based appsettings and env-var overrides.
+- `ApplicationInsights:ConnectionString` config slot.
+- `AzureKeyVault:VaultUri` config slot ready for provider wiring.
+- HTTPS + HSTS defaults and CORS policy configuration.

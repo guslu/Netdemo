@@ -14,13 +14,13 @@ public sealed class LoginCommandHandlerTests
         var identityService = new Mock<IIdentityService>();
         var jwtTokenGenerator = new Mock<IJwtTokenGenerator>();
 
-        var user = new AuthenticatedUser(Guid.NewGuid(), "member@netdemo.local", new[] { "Member" });
+        var user = new IdentityUserProfile(Guid.NewGuid(), "member@netdemo.local", Guid.NewGuid(), new[] { "Member" });
         identityService
             .Setup(x => x.ValidateCredentialsAsync("member@netdemo.local", "SecurePassword!123", It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         jwtTokenGenerator
-            .Setup(x => x.Generate(user.UserId.ToString(), user.Email, user.Roles))
+            .Setup(x => x.Generate(user.UserId.ToString(), user.Email, user.Roles, It.IsAny<IReadOnlyDictionary<string, string>>()))
             .Returns(new JwtTokenResult("jwt-token", DateTimeOffset.UtcNow.AddMinutes(60)));
 
         var handler = new LoginCommandHandler(identityService.Object, jwtTokenGenerator.Object);
@@ -28,6 +28,7 @@ public sealed class LoginCommandHandlerTests
         var result = await handler.Handle(new LoginCommand("member@netdemo.local", "SecurePassword!123"), CancellationToken.None);
 
         result.AccessToken.Should().Be("jwt-token");
+        result.OrganizationId.Should().Be(user.OrganizationId);
     }
 
     [Fact]
@@ -38,7 +39,7 @@ public sealed class LoginCommandHandlerTests
 
         identityService
             .Setup(x => x.ValidateCredentialsAsync("member@netdemo.local", "wrong", It.IsAny<CancellationToken>()))
-            .ReturnsAsync((AuthenticatedUser?)null);
+            .ReturnsAsync((IdentityUserProfile?)null);
 
         var handler = new LoginCommandHandler(identityService.Object, jwtTokenGenerator.Object);
 

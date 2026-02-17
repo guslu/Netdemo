@@ -16,4 +16,12 @@ public sealed class WorkItem : BaseEntity
         Title = string.IsNullOrWhiteSpace(title) ? throw new ArgumentException("Task title is required.") : title.Trim();
         Description = description?.Trim();
     }
+
+    public void Update(string title, string? description, bool isCompleted)
+    {
+        Title = string.IsNullOrWhiteSpace(title) ? throw new ArgumentException("Task title is required.") : title.Trim();
+        Description = description?.Trim();
+        IsCompleted = isCompleted;
+        MarkUpdated();
+    }
 }

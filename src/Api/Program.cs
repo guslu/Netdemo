@@ -1,12 +1,11 @@
 using System.Text;
 using Asp.Versioning;
-using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Netdemo.Api.Middleware;
+using Netdemo.Api.Services;
 using Netdemo.Application;
+using Netdemo.Application.Abstractions;
 using Netdemo.Infrastructure.Configuration;
 using Netdemo.Infrastructure.Data;
 using Netdemo.Infrastructure.DependencyInjection;
@@ -25,6 +24,8 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -95,7 +96,10 @@ app.MapHealthChecks("/health/live");
 app.MapHealthChecks("/health/ready");
 app.MapControllers();
 
-await DbInitializer.InitializeAsync(app.Services);
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    await DbInitializer.InitializeAsync(app.Services);
+}
 
 app.Run();
 

@@ -11,6 +11,6 @@ describe('App', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Sign in')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Sign in' })).toBeTruthy();
   });
 });
