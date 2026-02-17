@@ -6,28 +6,27 @@ using Netdemo.Domain.Entities;
 
 namespace Netdemo.Application.Features.Projects.Commands.CreateProject;
 
-public sealed class CreateProjectCommandHandler(IApplicationDbContext dbContext) : IRequestHandler<CreateProjectCommand, Guid>
+public sealed class CreateProjectCommandHandler(IApplicationDbContext dbContext, ICurrentUserService currentUserService, IAuditLogService auditLogService)
+    : IRequestHandler<CreateProjectCommand, Guid>
 {
     public async Task<Guid> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        var organizationExists = await dbContext.Organizations
-            .AsNoTracking()
-            .AnyAsync(x => x.Id == request.OrganizationId, cancellationToken);
-
-        if (!organizationExists)
+        if (request.OrganizationId != currentUserService.OrganizationId)
         {
-            throw new NotFoundException("Organization was not found.");
+            throw new ForbiddenException("Cross-organization access is not allowed.");
         }
 
-        var entity = new Project(request.OrganizationId, request.Name, request.Description);
-        dbContext.Projects.Add(entity);
+        var organizationExists = await dbContext.Organizations.AsNoTracking().AnyAsync(x => x.Id == request.OrganizationId, cancellationToken);
+        if (!organizationExists)
+        {
+            throw new NotFoundException("Organization not found.");
+        }
 
-        dbContext.AuditLogs.Add(new AuditLog(
-            request.OrganizationId,
-            "ProjectCreated",
-            $"Project '{entity.Name}' created with id '{entity.Id}'."));
-
+        var project = new Project(request.OrganizationId, request.Name, request.Description);
+        dbContext.Projects.Add(project);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return entity.Id;
+
+        await auditLogService.WriteAsync(currentUserService.OrganizationId, "ProjectCreated", $"Project '{project.Name}' created", cancellationToken);
+        return project.Id;
     }
 }

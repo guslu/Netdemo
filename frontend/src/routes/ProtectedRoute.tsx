@@ -1,8 +1,8 @@
 import { Navigate } from 'react-router-dom';
-import { tokenStore } from '../lib/tokenStore';
+import { sessionStore } from '../lib/sessionStore';
 
 export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  if (!tokenStore.get()) {
+  if (!sessionStore.getToken()) {
     return <Navigate to="/login" replace />;
   }
 

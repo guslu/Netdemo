@@ -15,7 +15,12 @@ public sealed class LoginCommandHandler(IIdentityService identityService, IJwtTo
             throw new ForbiddenException("Invalid email or password.");
         }
 
-        var token = jwtTokenGenerator.Generate(user.UserId.ToString(), user.Email, user.Roles);
-        return new LoginResult(token.AccessToken, token.ExpiresAtUtc);
+        var claims = new Dictionary<string, string>
+        {
+            ["organization_id"] = user.OrganizationId.ToString()
+        };
+
+        var token = jwtTokenGenerator.Generate(user.UserId.ToString(), user.Email, user.Roles, claims);
+        return new LoginResult(token.AccessToken, token.ExpiresAtUtc, user.OrganizationId, user.Roles);
     }
 }
