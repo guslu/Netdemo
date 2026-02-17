@@ -16,6 +16,10 @@ This repository now contains a production-oriented scaffold for a .NET 8 + React
 ## Delivery status
 - See detailed requirement-by-requirement status in `docs/DeliveryStatus.md`.
 
+## Delivery and prompting guidance
+- Requirement-by-requirement delivery mapping: `docs/DeliveryStatus.md`.
+- How to drive Codex for implementation-focused increments: `docs/CodexExecutionGuide.md`.
+
 ## Current scope
 This milestone only scaffolds structure and baseline wiring. Feature implementation (full auth flow, tenant isolation enforcement, richer business logic, migrations content, etc.) is intentionally deferred to next iterations.
 
