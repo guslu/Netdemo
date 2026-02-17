@@ -12,8 +12,10 @@ public sealed class JwtTokenGenerator(IOptions<JwtOptions> options) : IJwtTokenG
 {
     private readonly JwtOptions _options = options.Value;
 
-    public string Generate(string userId, string email, IEnumerable<string> roles)
+    public JwtTokenResult Generate(string userId, string email, IEnumerable<string> roles)
     {
+        var expiresAt = DateTimeOffset.UtcNow.AddMinutes(_options.ExpirationMinutes);
+
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, userId),
@@ -27,9 +29,10 @@ public sealed class JwtTokenGenerator(IOptions<JwtOptions> options) : IJwtTokenG
             issuer: _options.Issuer,
             audience: _options.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_options.ExpirationMinutes),
+            expires: expiresAt.UtcDateTime,
             signingCredentials: credentials);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var serialized = new JwtSecurityTokenHandler().WriteToken(token);
+        return new JwtTokenResult(serialized, expiresAt);
     }
 }

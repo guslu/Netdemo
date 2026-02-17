@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Netdemo.Application.Abstractions;
+using Netdemo.Application.Common.Exceptions;
 using Netdemo.Application.DTOs;
 
 namespace Netdemo.Application.Features.Projects.Queries.GetProjects;
@@ -9,6 +10,15 @@ public sealed class GetProjectsQueryHandler(IApplicationDbContext dbContext) : I
 {
     public async Task<IReadOnlyCollection<ProjectDto>> Handle(GetProjectsQuery request, CancellationToken cancellationToken)
     {
+        var organizationExists = await dbContext.Organizations
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == request.OrganizationId, cancellationToken);
+
+        if (!organizationExists)
+        {
+            throw new NotFoundException("Organization was not found.");
+        }
+
         return await dbContext.Projects
             .AsNoTracking()
             .Where(p => p.OrganizationId == request.OrganizationId)
