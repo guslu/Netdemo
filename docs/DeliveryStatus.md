@@ -28,7 +28,7 @@ Current repository status is therefore:
 - ✅ API versioning configured.
 - ✅ Health endpoints implemented (`/health/live`, `/health/ready`).
 - ✅ Serilog configured for structured logs.
-- ⏳ Authentication is partially implemented (login endpoint/handler present); register/refresh/revoke and tenant guards are pending.
+- ⏳ Real authentication workflows (register/login/refresh), tenant guards, and richer handlers are pending.
 
 ### Security
 - ✅ JWT + HTTPS redirection + HSTS (non-development) in pipeline.
@@ -79,7 +79,7 @@ Current repository status is therefore:
 - ⏳ Deployment manifests/pipelines (App Service, Azure SQL provisioning, IaC) remain pending.
 
 ## Suggested next increments (recommended order)
-1. Complete identity/auth flows (register, refresh/revoke, role assignment) on top of existing login flow.
+1. Implement full identity/auth flows (register/login, refresh, revoke, role assignment).
 2. Add tenant boundary enforcement end-to-end (claims + query filters + policy guards).
 3. Implement Projects/Tasks/Comments CRUD with authorization and validation.
 4. Add EF migrations and seed baseline organization/admin user.
