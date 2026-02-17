@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Netdemo.Application.Abstractions;
+using Netdemo.Domain.Common;
 using Netdemo.Domain.Entities;
 using Netdemo.Infrastructure.Identity;
 
@@ -14,6 +15,18 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<WorkItem> WorkItems => Set<WorkItem>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ApplyAuditFields();
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    public override int SaveChanges()
+    {
+        ApplyAuditFields();
+        return base.SaveChanges();
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -51,5 +64,24 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
                 .HasForeignKey(x => x.WorkItemId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        builder.Entity<AuditLog>(entity =>
+        {
+            entity.Property(x => x.EventType).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Details).HasMaxLength(4000).IsRequired();
+        });
+    }
+
+    private void ApplyAuditFields()
+    {
+        var entries = ChangeTracker.Entries<BaseEntity>();
+
+        foreach (var entry in entries)
+        {
+            if (entry.State is EntityState.Modified)
+            {
+                entry.Entity.MarkUpdated();
+            }
+        }
     }
 }

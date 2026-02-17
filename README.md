@@ -8,8 +8,13 @@ This repository now contains a production-oriented scaffold for a .NET 8 + React
 - **FluentValidation pipeline** for centralized request validation.
 - **EF Core + ASP.NET Identity** for persistence and identity/security baseline.
 - **ProblemDetails + global exception handling** for consistent API errors.
+- **Global exception mapping** with typed exceptions and validation problem details including trace ids for observability.
+- **Automatic audit timestamp updates** in persistence so `UpdatedAt` is consistently maintained.
 - **JWT + role-based authorization** for secure multi-role access.
 - **Environment-based settings** and env var overrides for secrets and cloud deployment readiness.
+
+## Delivery status
+- See detailed requirement-by-requirement status in `docs/DeliveryStatus.md`.
 
 ## Current scope
 This milestone only scaffolds structure and baseline wiring. Feature implementation (full auth flow, tenant isolation enforcement, richer business logic, migrations content, etc.) is intentionally deferred to next iterations.
