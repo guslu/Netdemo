@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+.vscode/
+.idea/
+*.user
+*.suo
+frontend/node_modules/
+frontend/dist/
+coverage/
+TestResults/
+.env

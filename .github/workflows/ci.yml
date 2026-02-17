@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore
+        run: dotnet restore Netdemo.sln
+      - name: Build
+        run: dotnet build Netdemo.sln -c Release --no-restore
+      - name: Test + coverage
+        run: dotnet test Netdemo.sln -c Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+      - name: Build api image
+        run: docker build -f Dockerfile.api -t netdemo-api:ci .
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Test
+        run: npm run test
+      - name: Build frontend image
+        run: docker build -f ../Dockerfile.frontend -t netdemo-frontend:ci ..

@@ -1,0 +1,29 @@
+version: '3.9'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=sqlserver,1433;Database=NetdemoDb;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=true
+      Jwt__Issuer: Netdemo.Api
+      Jwt__Audience: Netdemo.Client
+      Jwt__SigningKey: ${JWT_SIGNING_KEY}
+    ports:
+      - "5071:8080"
+    depends_on:
+      - sqlserver
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+
+volumes:
+  sqldata:
